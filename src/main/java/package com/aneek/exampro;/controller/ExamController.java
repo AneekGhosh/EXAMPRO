@@ -1,7 +1,17 @@
 package com.example.exam.controller;
 
 import com.example.exam.model.*;
+import com.example.exam.model.Exam;
+import com.example.exam.model.ExamAnswer;
+import com.example.exam.model.ExamResult;
+import com.example.exam.model.Question;
+import com.example.exam.model.User;
 import com.example.exam.repository.*;
+import com.example.exam.repository.ExamAnswerRepository;
+import com.example.exam.repository.ExamRepository;
+import com.example.exam.repository.ExamResultRepository;
+import com.example.exam.repository.QuestionRepository;
+import com.example.exam.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
