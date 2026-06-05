@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to ExamPro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-up { animation: fadeUp 0.8s ease forwards; }
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+
+        /* Hero Section */
+        .hero-section {
+            padding: 10rem 0 8rem;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 60%);
+            z-index: 0;
+        }
+
+        .hero-content { position: relative; z-index: 1; }
+        .hero-section h1 { font-size: 4rem; font-weight: 800; letter-spacing: -1px; }
+        .hero-section h1 span { color: #818cf8; }
+        .hero-section p { font-size: 1.25rem; color: #cbd5e1; font-weight: 300; }
+
+        /* Buttons */
+        .btn-custom-light {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-weight: 600;
+            padding: 0.8rem 2.5rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        .btn-custom-light:hover {
+            background-color: #e2e8f0;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-custom-outline {
+            border: 2px solid #6366f1;
+            color: #f8fafc;
+            font-weight: 600;
+            padding: 0.8rem 2.5rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        .btn-custom-outline:hover {
+            background-color: #6366f1;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Features */
+        .feature-icon {
+            font-size: 2.5rem;
+            color: #6366f1;
+            background: #e0e7ff;
+            width: 70px;
+            height: 70px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card {
+            border: none;
+            border-radius: 20px;
+            background: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s ease;
+            cursor: default;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .feature-card:hover .feature-icon {
+            background: #6366f1;
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        /* Developer Profile */
+        .dev-section {
+            background-color: #ffffff;
+            padding: 5rem 0;
+            border-top: 1px solid #e2e8f0;
+        }
+        .dev-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid #e0e7ff;
+            object-fit: cover;
+            margin-bottom: 1rem;
+        }
+        .social-link {
+            width: 45px;
+            height: 45px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            color: #ffffff;
+            text-decoration: none;
+        }
+        .social-github { background-color: #333; }
+        .social-github:hover { background-color: #000; transform: translateY(-3px); color: #fff;}
+        .social-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+        .social-instagram:hover { filter: brightness(1.1); transform: translateY(-3px); color: #fff;}
+        .social-linkedin { background-color: #0077b5; }
+        .social-linkedin:hover { background-color: #005582; transform: translateY(-3px); color: #fff;}
+
+        /* Footer */
+        .footer {
+            background-color: #0f172a;
+            color: #94a3b8;
+            padding: 2rem 0;
+            border-top: 1px solid #1e293b;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<!-- Navigation -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<!-- Hero Section -->
+<div class="hero-section text-center">
+    <div class="container hero-content">
+        <h1 class="display-4 mb-4 animate-fade-up">Welcome to <span>ExamPro</span></h1>
+        <p class="lead mb-5 mx-auto animate-fade-up delay-1" style="max-width: 650px;">
+            A next-generation assessment platform engineered for accuracy and scale. Experience real-time evaluations, robust security, and deep performance analytics.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap animate-fade-up delay-2" sec:authorize="!isAuthenticated()">
+            <a th:href="@{/login}" class="btn btn-custom-light">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Login to Portal
+            </a>
+            <a th:href="@{/register}" class="btn btn-custom-outline">
+                <i class="bi bi-person-plus me-2"></i>Register Now
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container my-5 py-5 flex-grow-1">
+    <div class="text-center mb-5 animate-fade-up">
+        <h2 class="fw-bold" style="color: #0f172a;">Platform Capabilities</h2>
+        <p class="text-muted">Built to streamline the entire examination lifecycle.</p>
+    </div>
+
+    <div class="row text-center g-4">
+        <!-- Feature 1 -->
+        <div class="col-md-4 animate-fade-up">
+            <div class="card feature-card h-100 p-4">
+                <div class="card-body">
+                    <div class="feature-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    <h4 class="card-title fw-bold mb-3">Live Analytics</h4>
+                    <p class="card-text text-muted">Experience timed examinations with zero lag. Instantly view scores and track your historical performance through an intuitive dashboard.</p>
+                </div>
+            </div>
+        </div>
+        <!-- Feature 2 -->
+        <div class="col-md-4 animate-fade-up delay-1">
+            <div class="card feature-card h-100 p-4">
+                <div class="card-body">
+                    <div class="feature-icon"><i class="bi bi-sliders"></i></div>
+                    <h4 class="card-title fw-bold mb-3">Admin Authority</h4>
+                    <p class="card-text text-muted">Design complex assessments, oversee student lifecycles, and extract detailed telemetry for every test submitted on the platform.</p>
+                </div>
+            </div>
+        </div>
+        <!-- Feature 3 -->
+        <div class="col-md-4 animate-fade-up delay-2">
+            <div class="card feature-card h-100 p-4">
+                <div class="card-body">
+                    <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+                    <h4 class="card-title fw-bold mb-3">Enterprise Security</h4>
+                    <p class="card-text text-muted">Secured via Spring Security. Your session state is strictly protected, and intelligent auto-submit timers ensure zero data loss.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Developer Profile Section -->
+<div class="dev-section">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8 animate-fade-up">
+                <h2 class="fw-bold mb-5" style="color: #0f172a;">Meet the Developer</h2>
+
+                <img src="https://ui-avatars.com/api/?name=Aneek+Ghosh&background=6366f1&color=fff&size=120" alt="Aneek Ghosh" class="dev-avatar shadow-sm">
+
+                <h3 class="fw-bold mt-3 mb-1">Aneek Ghosh</h3>
+                <h6 class="text-primary fw-semibold mb-4">Java Developer | Creator of ExamPro</h6>
+
+                <p class="text-muted mb-4 mx-auto" style="max-width: 600px;">
+                    Passionate about building scalable backend architectures and seamless user experiences. ExamPro was engineered using Java, Spring Boot, and modern frontend technologies to demonstrate enterprise-grade application development.
+                </p>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="https://github.com/AneekGhosh" target="_blank" class="social-link social-github" title="GitHub">
+                        <i class="bi bi-github"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/in/aneek-ghosh-a93127249" target="_blank" class="social-link social-linkedin" title="LinkedIn">
+                        <i class="bi bi-linkedin"></i>
+                    </a>
+                    <a href="https://instagram.com/__aneekk__" target="_blank" class="social-link social-instagram" title="Instagram">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer mt-auto">
+    <div class="container text-center">
+        <p class="mb-1 fw-medium text-light">© 2026 ExamPro System</p>
+        <p class="mb-0 small">Built with <i class="bi bi-heart-fill text-danger mx-1"></i> by Aneek Ghosh</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

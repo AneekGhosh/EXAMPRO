@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${exam.title}">Exam Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+
+        .student-header { background-color: #fff; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 2rem; padding: 1.5rem 2rem; border: none; }
+        .student-pic { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 3px solid #e0e7ff; }
+        .exam-details-badge { background: #f1f5f9; padding: 10px 15px; border-radius: 10px; display: inline-block; margin-right: 15px; margin-top: 10px; font-size: 0.9rem; color: #475569;}
+        .exam-details-badge strong { color: #0f172a; margin-right: 5px;}
+
+        .exam-layout { display: flex; flex-wrap: wrap; gap: 24px; }
+        .question-area { flex: 3; min-width: 300px; }
+        .palette-area { flex: 1; min-width: 280px; }
+
+        .question-palette { position: sticky; top: 24px; background: #fff; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden;}
+
+        .timer-display { padding: 1.5rem; text-align: center; background: #0f172a; color: white; }
+        .timer-label { font-size: 0.85rem; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; margin-bottom: 5px; }
+        #timer { font-size: 2.8rem; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; line-height: 1; }
+        #timer.warning { color: #ef4444; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .palette-body { padding: 1.5rem; }
+        .palette-header { font-weight: 700; color: #0f172a; margin-bottom: 1rem; font-size: 1.1rem; }
+        .palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 10px; }
+
+        .q-palette-btn {
+            display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 1;
+            border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; background-color: #fff; font-weight: 600; color: #64748b;
+            transition: all 0.2s ease;
+        }
+        .q-palette-btn:hover { border-color: #cbd5e1; background: #f8fafc; }
+        .q-palette-btn.active { border-color: #6366f1; background-color: #e0e7ff; color: #6366f1; box-shadow: 0 0 0 4px rgba(99,102,241,0.1); transform: scale(1.05); }
+        .q-palette-btn.answered { background-color: #10b981; color: white; border-color: #10b981; }
+        .q-palette-btn.active.answered { background-color: #059669; border-color: #059669; box-shadow: 0 0 0 4px rgba(16,185,129,0.2); }
+
+        .question-card { display: none; margin-bottom: 24px; background-color: #fff; border: none; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .question-card.active { display: block; }
+        .question-card .card-header { background-color: transparent; border-bottom: 1px solid #f1f5f9; padding: 1.5rem 2rem; font-size: 1.25rem; font-weight: 700; color: #0f172a; }
+        .question-card .card-body { padding: 2rem; }
+        .question-card .card-text { font-size: 1.15rem; font-weight: 500; color: #1e293b; margin-bottom: 2rem; line-height: 1.6; }
+
+        .option-container { display: block; border: 2px solid #e2e8f0; border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 12px; transition: all 0.2s ease; cursor: pointer; background: #fff; }
+        .option-container:hover { border-color: #cbd5e1; background-color: #f8fafc; }
+        .option-container:has(input[type="radio"]:checked) { border-color: #6366f1; background-color: #f8fafc; box-shadow: 0 4px 6px -1px rgba(99,102,241,0.1); }
+        .option-container input[type="radio"] { width: 1.2rem; height: 1.2rem; margin-right: 15px; accent-color: #6366f1; cursor: pointer; }
+        .option-container label { cursor: pointer; width: 100%; margin-bottom: 0; font-size: 1.05rem; color: #334155; font-weight: 500; display: flex; align-items: center; }
+
+        .pagination-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+        .btn-page { border-radius: 10px; padding: 0.8rem 2rem; font-weight: 600; transition: all 0.2s; }
+        .btn-page-prev { background: #fff; color: #475569; border: 1px solid #cbd5e1; }
+        .btn-page-prev:hover:not(:disabled) { background: #f1f5f9; color: #0f172a; }
+        .btn-page-next { background: #6366f1; color: #fff; border: none; }
+        .btn-page-next:hover:not(:disabled) { background: #4f46e5; box-shadow: 0 4px 12px rgba(99,102,241,0.3); transform: translateY(-2px); }
+        .btn-submit { background: #10b981; border: none; border-radius: 10px; padding: 1rem; font-weight: 700; font-size: 1.1rem; transition: all 0.3s; }
+        .btn-submit:hover { background: #059669; box-shadow: 0 4px 12px rgba(16,185,129,0.3); transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+<div class="container my-4">
+    <div class="student-header">
+        <div class="d-flex align-items-center">
+            <div class="flex-shrink-0 me-4">
+                <img th:if="${student.profilePicUrl != null}" th:src="@{${student.profilePicUrl}}" alt="Profile" class="student-pic shadow-sm">
+                <svg th:if="${student.profilePicUrl == null}" xmlns="http://www.w3.org/2000/svg" width="65" height="65" fill="#6366f1" class="bi bi-person-circle student-pic bg-white" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                </svg>
+            </div>
+            <div class="flex-grow-1 border-end pe-4 me-4">
+                <h4 class="mb-1 fw-bold text-dark" th:text="${student.fullName}">Student Name</h4>
+                <div class="text-muted small">
+                    <i class="bi bi-envelope me-1"></i><span th:text="${student.username}" class="me-3"></span>
+                    <i class="bi bi-telephone me-1"></i><span th:text="${student.mobileNumber}"></span>
+                </div>
+            </div>
+            <div class="flex-grow-2">
+                <div class="exam-details-badge"><strong>EXAM:</strong> <span th:text="${exam.title}"></span></div>
+                <div class="exam-details-badge"><strong>TIME:</strong> <span th:text="${exam.durationInMinutes} + ' mins'"></span></div>
+                <div class="exam-details-badge"><strong>Q's:</strong> <span th:text="${#lists.size(questions)}"></span></div>
+            </div>
+        </div>
+    </div>
+
+    <form id="exam-form" th:action="@{/exam/submit}" method="post">
+        <input type="hidden" name="examId" th:value="${exam.id}" />
+        <div class="exam-layout">
+            <div class="question-area">
+                <div th:each="question, iter : ${questions}" class="card question-card" th:id="|q-card-${iter.index}|" th:data-question-index="${iter.index}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Question <span th:text="${iter.count}"></span></span>
+                        <span class="badge bg-indigo-light text-indigo border rounded-pill px-3" style="background:#e0e7ff; color:#6366f1;" th:text="${question.marks} + ' Marks'"></span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text" th:text="${question.text}">Question text...</p>
+                        <div class="options-wrapper mt-4">
+                            <div class="option-container">
+                                <label th:for="|q${question.id}_opt1|">
+                                    <input type="radio" th:name="|q_${question.id}|" th:id="|q${question.id}_opt1|" value="1" required>
+                                    <span th:text="${question.option1}">Option 1</span>
+                                </label>
+                            </div>
+                            <div class="option-container">
+                                <label th:for="|q${question.id}_opt2|">
+                                    <input type="radio" th:name="|q_${question.id}|" th:id="|q${question.id}_opt2|" value="2">
+                                    <span th:text="${question.option2}">Option 2</span>
+                                </label>
+                            </div>
+                            <div class="option-container">
+                                <label th:for="|q${question.id}_opt3|">
+                                    <input type="radio" th:name="|q_${question.id}|" th:id="|q${question.id}_opt3|" value="3">
+                                    <span th:text="${question.option3}">Option 3</span>
+                                </label>
+                            </div>
+                            <div class="option-container">
+                                <label th:for="|q${question.id}_opt4|">
+                                    <input type="radio" th:name="|q_${question.id}|" th:id="|q${question.id}_opt4|" value="4">
+                                    <span th:text="${question.option4}">Option 4</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pagination-controls">
+                    <button type="button" id="prev-btn" class="btn btn-page btn-page-prev">
+                        <i class="bi bi-arrow-left me-2"></i> Previous
+                    </button>
+                    <button type="button" id="next-btn" class="btn btn-page btn-page-next">
+                        Next <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="palette-area">
+                <div class="question-palette">
+                    <div class="timer-display">
+                        <div class="timer-label"><i class="bi bi-stopwatch me-1"></i> Time Remaining</div>
+                        <div id="timer">--:--</div>
+                    </div>
+                    <div class="palette-body">
+                        <div class="palette-header">Navigation Palette</div>
+                        <div class="palette-grid">
+                            <button type="button" th:each="q, iter : ${questions}" class="q-palette-btn shadow-sm" th:text="${iter.count}" th:data-question-index="${iter.index}"></button>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-light border-top">
+                        <button type="submit" id="submit-btn" class="btn btn-submit text-white w-100 shadow-sm">
+                            <i class="bi bi-check2-circle me-2"></i>Submit Exam
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script th:src="@{/js/exam-timer.js}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var durationInMinutes = [[${exam.durationInMinutes}]];
+        var timerDisplay = document.getElementById('timer');
+        var examForm = document.getElementById('exam-form');
+
+        // Simple mock of your startTimer logic to add the warning class if time < 5 min.
+        // Assuming your external JS handles the real countdown.
+        startTimer(durationInMinutes, timerDisplay, examForm);
+
+        const questions = document.querySelectorAll('.question-card');
+        const paletteBtns = document.querySelectorAll('.q-palette-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        let currentQuestionIndex = 0;
+        const totalQuestions = questions.length;
+
+        function showQuestion(index) {
+            if (index < 0 || index >= totalQuestions) return;
+            questions.forEach(q => q.classList.remove('active'));
+            const newQuestion = document.getElementById('q-card-' + index);
+            if (newQuestion) newQuestion.classList.add('active');
+            paletteBtns.forEach(btn => btn.classList.remove('active'));
+            const newPaletteBtn = document.querySelector(`.q-palette-btn[data-question-index="${index}"]`);
+            if (newPaletteBtn) newPaletteBtn.classList.add('active');
+            currentQuestionIndex = index;
+            prevBtn.disabled = (currentQuestionIndex === 0);
+            nextBtn.disabled = (currentQuestionIndex === totalQuestions - 1);
+        }
+
+        nextBtn.addEventListener('click', () => showQuestion(currentQuestionIndex + 1));
+        prevBtn.addEventListener('click', () => showQuestion(currentQuestionIndex - 1));
+
+        paletteBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                showQuestion(parseInt(btn.getAttribute('data-question-index')));
+            });
+        });
+
+        const allRadioButtons = document.querySelectorAll('input[type="radio"]');
+        allRadioButtons.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const questionCard = this.closest('.question-card');
+                const index = questionCard.getAttribute('data-question-index');
+                const paletteBtn = document.querySelector(`.q-palette-btn[data-question-index="${index}"]`);
+                if (paletteBtn) paletteBtn.classList.add('answered');
+            });
+        });
+
+        showQuestion(0);
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>My Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeUp 0.6s ease forwards; opacity: 0; }
+
+        .header-icon {
+            width: 70px; height: 70px; background: #e0e7ff; color: #6366f1;
+            border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-right: 1.5rem;
+        }
+
+        .result-card {
+            border: none; border-radius: 16px; background: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: all 0.3s ease; padding: 1rem;
+        }
+        .result-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+
+        .score-box { background: #f8fafc; border-radius: 12px; padding: 1.5rem; border: 1px solid #f1f5f9; }
+        .score-percent { font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 0.5rem; }
+        .score-raw { font-size: 1rem; color: #64748b; font-weight: 500; }
+
+        .btn-review { background-color: #f1f5f9; color: #0f172a; border: none; border-radius: 10px; font-weight: 600; padding: 0.75rem; transition: all 0.2s; }
+        .btn-review:hover { background-color: #e2e8f0; color: #6366f1; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-5 mb-5">
+    <div class="pb-4 mb-5 border-bottom border-light d-flex align-items-center animate-fade-up" style="animation-delay: 0s;">
+        <div class="header-icon"><i class="bi bi-award-fill"></i></div>
+        <div>
+            <h2 class="mb-1 fw-bold text-dark">My Exam History</h2>
+            <p class="text-muted mb-0 fs-5">Review your scores and past attempts here.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <th:block th:if="${#lists.isEmpty(pastResults)}">
+            <div class="col-12 animate-fade-up" style="animation-delay: 0.1s;">
+                <div class="card result-card text-center p-5">
+                    <div class="card-body py-5">
+                        <i class="bi bi-folder-x mb-3 text-muted opacity-50" style="font-size: 4rem;"></i>
+                        <h3 class="fw-bold text-dark">No Results Found</h3>
+                        <p class="text-muted fs-5 mb-4">You have not completed any exams yet.</p>
+                        <a th:href="@{/student/dashboard}" class="btn btn-primary px-4 py-2 rounded-pill" style="background: #6366f1; border: none;">
+                            <i class="bi bi-rocket-takeoff me-2"></i>Find an Exam to Take
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+
+        <div class="col-md-6 col-lg-4 animate-fade-up" th:each="result, iterStat : ${pastResults}" th:style="'animation-delay: ' + (${iterStat.index} * 0.1) + 's;'">
+            <div class="card result-card h-100">
+                <div class="card-body d-flex flex-column p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h4 class="card-title fw-bold text-dark mb-0" th:text="${result.exam.title}">Java Basics</h4>
+                        <span class="badge bg-light text-muted border"><i class="bi bi-calendar-event me-1"></i><span th:text="${#temporals.format(result.submissionTime, 'MMM dd')}"></span></span>
+                    </div>
+
+                    <div class="score-box text-center my-4 flex-grow-1">
+                        <div th:if="${result.totalMarks > 0}">
+                            <th:block th:with="percentage=${(result.scoreAchieved * 100.0) / result.totalMarks}">
+                                <div class="score-percent"
+                                     th:classappend="${percentage >= 70 ? 'text-success' : 'text-danger'}"
+                                     th:text="${#numbers.formatDecimal(percentage, 1, 1) + '%'}">
+                                </div>
+                                <div class="score-raw" th:text="|Score: ${result.scoreAchieved} / ${result.totalMarks}|"></div>
+                            </th:block>
+                        </div>
+                        <div th:if="${result.totalMarks == 0}" class="py-3">
+                            <span class="score-percent text-muted">N/A</span>
+                        </div>
+                    </div>
+
+                    <a th:href="@{/student/review/{id}(id=${result.id})}" class="btn btn-review w-100">
+                        Review Details <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

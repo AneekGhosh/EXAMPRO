@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Exam Submitted</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    body { background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .result-card { border: none; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); border-radius: 24px; overflow: hidden; animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;}
+
+    .result-header { padding: 3rem 2rem 2rem; text-align: center; color: white; }
+    .bg-pass { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .bg-fail { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
+
+    .icon-circle { width: 100px; height: 100px; background: rgba(255,255,255,0.2); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 4rem; margin-bottom: 1.5rem; backdrop-filter: blur(10px); }
+    .result-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.5px;}
+
+    .result-body { padding: 3rem; background: #fff; text-align: center;}
+    .score-display { font-size: 4.5rem; font-weight: 900; line-height: 1; margin-bottom: 0.5rem; font-variant-numeric: tabular-nums; }
+    .score-raw { font-size: 1.25rem; color: #64748b; font-weight: 500; }
+
+    .progress { height: 16px; border-radius: 20px; background-color: #f1f5f9; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); margin: 2rem 0; overflow: visible;}
+    .progress-bar { border-radius: 20px; transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1); box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative;}
+    .progress-bar::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%); border-radius: 20px; }
+
+    .btn-custom { border-radius: 12px; font-weight: 600; padding: 1rem 1.5rem; transition: 0.3s; }
+    .btn-outline-dark-custom { border: 2px solid #e2e8f0; color: #334155; background: #fff; }
+    .btn-outline-dark-custom:hover { background: #f8fafc; border-color: #cbd5e1; transform: translateY(-2px); }
+    .btn-indigo { background: #6366f1; color: white; border: none; box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+    .btn-indigo:hover { background: #4f46e5; color: white; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(99,102,241,0.4); }
+  </style>
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6 text-center">
+      <th:block th:with="percentage=${(total > 0) ? (score * 100.0) / total : 0}, isPass=${percentage >= 50}">
+        <div class="result-card">
+          <div class="result-header" th:classappend="${isPass ? 'bg-pass' : 'bg-fail'}">
+            <div class="icon-circle">
+              <i class="bi" th:classappend="${isPass ? 'bi-trophy-fill' : 'bi-x-circle-fill'}"></i>
+            </div>
+            <h1 class="result-title" th:text="${isPass ? 'Congratulations!' : 'Keep Practicing'}">Result</h1>
+            <p class="fs-5 opacity-75 mb-0" th:text="${isPass ? 'You have successfully passed the exam.' : 'You did not meet the passing criteria this time.'}"></p>
+          </div>
+
+          <div class="result-body">
+            <h3 class="text-muted fw-bold text-uppercase fs-6 tracking-wide mb-3">Your Final Score</h3>
+
+            <div class="score-display" th:classappend="${isPass ? 'text-success' : 'text-danger'}">
+              <span th:text="|${#numbers.formatDecimal(percentage, 1, 1)}%|">75.0%</span>
+            </div>
+            <div class="score-raw" th:text="|${score} out of ${total} points|">15 / 20</div>
+
+            <div class="progress">
+              <div class="progress-bar progress-bar-striped progress-bar-animated"
+                   th:classappend="${isPass ? 'bg-success' : 'bg-danger'}"
+                   role="progressbar"
+                   th:style="|width: ${percentage}%;|"
+                   th:attr="aria-valuenow=${percentage}"
+                   aria-valuemin="0" aria-valuemax="100">
+              </div>
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center mt-5">
+              <a th:href="@{/student/dashboard}" class="btn btn-custom btn-outline-dark-custom flex-grow-1">
+                <i class="bi bi-house-door me-2"></i>Dashboard
+              </a>
+              <a th:if="${resultId != null}" th:href="@{/student/review/{id}(id=${resultId})}" class="btn btn-custom btn-indigo flex-grow-1">
+                <i class="bi bi-search me-2"></i>Review Answers
+              </a>
+            </div>
+          </div>
+        </div>
+      </th:block>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

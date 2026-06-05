@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Dashboard - ExamPro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-up { animation: fadeUp 0.6s ease forwards; opacity: 0; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+
+        /* Shared Card Styles */
+        .custom-card {
+            background-color: #fff; border: none; border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: all 0.3s ease;
+        }
+
+        /* KPI Cards */
+        .kpi-card { padding: 1.5rem; display: flex; align-items: center; height: 100%; }
+        .kpi-card:hover { transform: translateY(-5px); box-shadow: 0 15px 25px -5px rgba(0,0,0,0.1); }
+        .kpi-icon-wrapper {
+            width: 60px; height: 60px; border-radius: 16px; display: flex;
+            align-items: center; justify-content: center; font-size: 1.8rem; margin-right: 1.25rem;
+        }
+        .kpi-value { font-size: 1.8rem; font-weight: 800; color: #0f172a; line-height: 1.2; }
+        .kpi-label { font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Icon Colors */
+        .icon-blue { background-color: #e0f2fe; color: #0284c7; }
+        .icon-indigo { background-color: #e0e7ff; color: #6366f1; }
+        .icon-green { background-color: #dcfce7; color: #16a34a; }
+        .icon-amber { background-color: #fef3c7; color: #d97706; }
+
+        /* Buttons & Quick Links */
+        .btn-indigo { background: #6366f1; color: white; border-radius: 10px; font-weight: 600; padding: 0.8rem 1.2rem; border: none; transition: 0.3s; }
+        .btn-indigo:hover { background: #4f46e5; color: white; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99,102,241,0.2); }
+
+        .quick-link-btn {
+            display: flex; align-items: center; padding: 1rem; border-radius: 12px;
+            background: #f8fafc; color: #334155; text-decoration: none; font-weight: 600; transition: 0.2s; border: 1px solid #f1f5f9;
+        }
+        .quick-link-btn:hover { background: #e0e7ff; color: #6366f1; border-color: #c7d2fe; transform: translateX(5px); }
+        .quick-link-btn i { font-size: 1.2rem; margin-right: 15px; }
+
+        /* Tables */
+        .table-hover tbody tr:hover { background-color: #f8fafc; }
+        .table > :not(caption) > * > * { padding: 1rem 1.5rem; border-bottom-color: #f1f5f9; vertical-align: middle; }
+        .table-light th { background-color: #f8fafc; color: #475569; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0; }
+
+        .chart-container { height: 320px; width: 100%; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-5 mb-5">
+
+    <div class="d-flex justify-content-between align-items-end mb-4 animate-fade-up">
+        <div>
+            <h2 class="mb-1 fw-bold text-dark">System Overview</h2>
+            <p class="mb-0 text-muted fs-5">Welcome to the ExamPro Admin Control Center.</p>
+        </div>
+        <div>
+            <a th:href="@{/admin/exam/add}" class="btn btn-indigo shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i>New Exam
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4 animate-fade-up delay-1">
+        <div class="col-md-6 col-lg-3">
+            <div class="custom-card kpi-card">
+                <div class="kpi-icon-wrapper icon-blue"><i class="bi bi-people-fill"></i></div>
+                <div>
+                    <div class="kpi-value" th:text="${totalStudents ?: '125'}">0</div>
+                    <div class="kpi-label">Total Students</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="custom-card kpi-card">
+                <div class="kpi-icon-wrapper icon-indigo"><i class="bi bi-journal-text"></i></div>
+                <div>
+                    <div class="kpi-value" th:text="${totalExams ?: '12'}">0</div>
+                    <div class="kpi-label">Active Exams</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="custom-card kpi-card">
+                <div class="kpi-icon-wrapper icon-green"><i class="bi bi-check-circle-fill"></i></div>
+                <div>
+                    <div class="kpi-value" th:text="${totalSubmissions ?: '845'}">0</div>
+                    <div class="kpi-label">Submissions</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="custom-card kpi-card">
+                <div class="kpi-icon-wrapper icon-amber"><i class="bi bi-ui-radios"></i></div>
+                <div>
+                    <div class="kpi-value" th:text="${totalQuestions ?: '320'}">0</div>
+                    <div class="kpi-label">Question Bank</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 animate-fade-up delay-2">
+        <div class="col-lg-8">
+            <div class="custom-card p-4 h-100">
+                <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-graph-up text-indigo me-2" style="color: #6366f1;"></i>Submission Activity (Last 7 Days)</h5>
+                <div class="chart-container">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="custom-card p-4 h-100">
+                <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Quick Actions</h5>
+
+                <div class="d-flex flex-column gap-3">
+                    <a th:href="@{/admin/manage-exams}" class="quick-link-btn">
+                        <i class="bi bi-journals text-primary"></i>
+                        <span>Manage All Exams</span>
+                        <i class="bi bi-chevron-right ms-auto text-muted" style="font-size: 0.9rem; margin-right: 0;"></i>
+                    </a>
+
+                    <a th:href="@{/admin/student/manage}" class="quick-link-btn">
+                        <i class="bi bi-people text-success"></i>
+                        <span>Manage Students</span>
+                        <i class="bi bi-chevron-right ms-auto text-muted" style="font-size: 0.9rem; margin-right: 0;"></i>
+                    </a>
+
+                    <a th:href="@{/admin/exam/add}" class="quick-link-btn border-indigo-subtle bg-indigo-subtle" style="background-color: #f5f3ff;">
+                        <i class="bi bi-plus-circle text-indigo" style="color: #6366f1;"></i>
+                        <span style="color: #4f46e5;">Create New Exam</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4 animate-fade-up delay-3">
+        <div class="col-12">
+            <div class="custom-card overflow-hidden">
+                <div class="d-flex justify-content-between align-items-center p-4 border-bottom border-light">
+                    <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-clock-history text-secondary me-2"></i>Recent Submissions</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="ps-4">Student</th>
+                            <th scope="col">Exam</th>
+                            <th scope="col">Score</th>
+                            <th scope="col" class="text-end pe-4">Date</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${recentSubmissions == null or #lists.isEmpty(recentSubmissions)}">
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-2 mb-2 d-block opacity-50"></i>
+                                No recent exam activity to display.
+                            </td>
+                        </tr>
+
+                        <tr th:if="${recentSubmissions == null}">
+                            <td class="ps-4 fw-medium text-dark">Jane Smith</td>
+                            <td>Advanced Spring Boot</td>
+                            <td><span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">92%</span></td>
+                            <td class="text-end pe-4 text-muted small">Today, 10:42 AM</td>
+                        </tr>
+                        <tr th:if="${recentSubmissions == null}">
+                            <td class="ps-4 fw-medium text-dark">Michael Johnson</td>
+                            <td>Java Basics Midterm</td>
+                            <td><span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">45%</span></td>
+                            <td class="text-end pe-4 text-muted small">Today, 09:15 AM</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        // You can pass these arrays from your Spring Boot Controller using the Model
+        // e.g., model.addAttribute("chartLabels", ["Mon", "Tue", "Wed"...]);
+        const labels = /*[[${chartLabels}]]*/ ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const dataPoints = /*[[${chartData}]]*/ [12, 19, 15, 25, 22, 30, 28];
+
+        const ctx = document.getElementById('activityChart').getContext('2d');
+
+        // Create a smooth gradient for the chart fill
+        const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.5)'); // Indigo with opacity
+        gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)'); // Fade to transparent
+
+        new Chart(ctx, {
+            type: 'bar', // You can change this to 'line' if you prefer
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Exam Submissions',
+                    data: dataPoints,
+                    backgroundColor: gradient,
+                    borderColor: '#6366f1',
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    hoverBackgroundColor: '#4f46e5'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        padding: 12,
+                        cornerRadius: 8,
+                        titleFont: { size: 13 },
+                        bodyFont: { size: 14, weight: 'bold' },
+                        displayColors: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f1f5f9', drawBorder: false },
+                        ticks: { color: '#64748b', stepSize: 5 }
+                    },
+                    x: {
+                        grid: { display: false, drawBorder: false },
+                        ticks: { color: '#64748b' }
+                    }
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark shadow-sm" style="background-color: #0f172a;">
+  <style>
+    .navbar-brand { font-weight: 700; letter-spacing: 0.5px; }
+    .navbar-profile-pic {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      border: 2px solid #6366f1;
+      padding: 2px;
+    }
+    .nav-link { font-weight: 500; transition: color 0.3s ease; }
+    .nav-link:hover { color: #818cf8 !important; }
+  </style>
+  <div class="container-fluid px-4">
+    <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
+      <i class="bi bi-hexagon-fill text-indigo" style="color: #6366f1;"></i> ExamPro
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+          <a class="nav-link" th:href="@{/admin/dashboard}">Dashboard</a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+          <a class="nav-link" th:href="@{/admin/manage-exams}">Manage Exams</a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+          <a class="nav-link" th:href="@{/admin/students}">Manage Students</a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('STUDENT')">
+          <a class="nav-link" th:href="@{/student/dashboard}">Dashboard</a>
+        </li>
+        <li class="nav-item" sec:authorize="hasRole('STUDENT')">
+          <a class="nav-link" th:href="@{/student/my-results}">My Results</a>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item" sec:authorize="!isAuthenticated()">
+          <a class="nav-link" th:href="@{/login}">Login</a>
+        </li>
+        <li class="nav-item" sec:authorize="!isAuthenticated()">
+          <a class="btn btn-primary btn-sm rounded-pill px-3 ms-2" th:href="@{/register}" style="background-color: #6366f1; border: none;">Create Account</a>
+        </li>
+
+        <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+          <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img th:if="${globalProfilePicUrl != null}" th:src="@{${globalProfilePicUrl}}" alt="Profile" class="navbar-profile-pic">
+            <svg th:if="${globalProfilePicUrl == null}" xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="#94a3b8" class="bi bi-person-circle navbar-profile-pic" viewBox="0 0 16 16">
+              <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+              <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+            </svg>
+            <span sec:authentication="name" class="fw-semibold"></span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="navbarDropdown">
+            <li sec:authorize="hasRole('STUDENT')"><a class="dropdown-item" th:href="@{/student/profile}">My Profile</a></li>
+            <li sec:authorize="hasRole('STUDENT')"><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item text-danger" href="javascript:document.getElementById('logoutForm').submit();">Logout</a>
+              <form th:action="@{/logout}" method="post" id="logoutForm" class="d-none"></form>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+</body>
+</html>
